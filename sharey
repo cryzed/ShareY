@@ -19,7 +19,7 @@ gi.require_version('Notify', '0.7')
 
 import pyperclip
 
-# xsel and xclip are the only clipboards that work reliably for me
+# xsel and xclip are the only clipboard backends that work reliably for me
 pyperclip.set_clipboard('xsel')
 
 import imgurpython
@@ -62,9 +62,9 @@ class ImgurComUploader(Uploader):
         return result['link']
 
 
-UPLOADERS = collections.OrderedDict(
-    ((ImgurComUploader.NAME, ImgurComUploader),)
-)
+UPLOADERS = collections.OrderedDict((
+    (ImgurComUploader.NAME, ImgurComUploader),
+))
 UPLOADER_NAMES = tuple(UPLOADERS.keys())
 
 argument_parser = argparse.ArgumentParser()

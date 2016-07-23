@@ -43,7 +43,7 @@ Currently you have to manually create a file in `~/.config/sharey.ini` with the 
 to imgur.
 ```
 [imgur.com]
-client_id = <your imgur client secret>
+client_id = <your imgur client ID>
 client_secret = <your imgur client secret>
 ```
 
@@ -72,6 +72,6 @@ uploaded instead.
 * pyperclip
 
 The script is written in Python 3, Spectacle is used as the primary (and currently only) backend for taking screenshots,
-pydbus is used to communicate with Spectacle via D-Bus to take screenshots, Pillow to optionally convert screenshots to
-JPEG after exceeding a certain size as PNG, imgurpython to upload the image via imgur's API, xsel as a reliable
-clipboard backend for pyperclip to copy the URL to the clipboard in a (hopefully) desktop-environment-agnostic fashion.
+pydbus to communicate with Spectacle via D-Bus to take screenshots, Pillow to optionally convert screenshots to JPEG
+after exceeding a certain size as PNG, imgurpython to upload the image via imgur's API and xsel as a reliable clipboard
+backend for pyperclip to copy the URL to the clipboard in a (hopefully) desktop-environment-agnostic fashion.
