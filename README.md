@@ -9,6 +9,14 @@ clipboard -> Notify user), that using it quickly became second nature to share o
 Of course this utility only supports a very small part of ShareX's features, however they are the features I used and
 enjoyed most.
 
+## Installation
+I made PKGBUILDs for Arch Linux [here](https://github.com/cryzed/PKGBUILDs). You'll have to manually install
+[python-imgurpython-git](https://github.com/cryzed/PKGBUILDs/tree/master/python-imgurpython-git) (use `--asdeps`) and
+then [sharey](https://github.com/cryzed/PKGBUILDs/tree/master/sharey). As noted in the
+[readme](https://github.com/cryzed/PKGBUILDs/blob/master/README.md), feel free to adopt any of these packages and upload
+them to the AUR. I don't really want to maintain them.
+
+
 ## Usage
 ```
 usage: sharey [-h] [--include-cursor] [--include-window-decorations]
