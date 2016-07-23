@@ -1,0 +1,135 @@
+#!/usr/bin/env python
+
+# Dependency array for an Arch Linux PKGBUILD:
+# depends=('python' 'spectacle' 'python-pydbus' 'python-pillow' 'python-imgurpython' 'xsel' 'python-pyperclip')
+# TODO: Support different screenshotters using class abstractions
+
+import argparse
+import collections
+import configparser
+import os
+import sys
+import tempfile
+import traceback
+
+import PIL.Image
+import gi
+
+gi.require_version('Notify', '0.7')
+
+import pyperclip
+
+# xsel and xclip are the only clipboards that work reliably for me
+pyperclip.set_clipboard('xsel')
+
+import imgurpython
+import pydbus
+from gi.repository import GObject, Notify
+
+APPLICATION_NAME = 'ShareY'
+CONFIG_PATH = '~/.config/%s.ini' % APPLICATION_NAME.lower()
+
+SPECTACLE_BUS_INFO = 'org.kde.Spectacle', '/'
+SPECTACLE_METHODS_ONE = 'FullScreen', 'CurrentScreen', 'RectangularRegion'
+SPECTACLE_METHODS_TWO = 'ActiveWindow', 'WindowUnderCursor'
+SPECTACLE_METHODS = SPECTACLE_METHODS_ONE + SPECTACLE_METHODS_TWO
+BYTES_PER_KIB = 1024
+
+
+class Uploader:
+    NAME = None
+
+    def __init__(self, arguments, config):
+        self.arguments = arguments
+        self.config = config
+
+    def upload(self, path):
+        raise NotImplementedError()
+
+
+class ImgurComUploader(Uploader):
+    NAME = 'imgur.com'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.config = self.config[self.NAME]
+
+    def upload(self, path):
+        client = imgurpython.ImgurClient(self.config['client_id'], self.config['client_secret'])
+        with open(path, 'rb') as file:
+            result = client.upload(file)
+
+        return result['link']
+
+
+UPLOADERS = collections.OrderedDict(
+    ((ImgurComUploader.NAME, ImgurComUploader),)
+)
+UPLOADER_NAMES = tuple(UPLOADERS.keys())
+
+argument_parser = argparse.ArgumentParser()
+argument_parser.add_argument('method', nargs='?', default='RectangularRegion', choices=SPECTACLE_METHODS)
+argument_parser.add_argument('--include-cursor', action='store_true')
+argument_parser.add_argument('--include-window-decorations', action='store_true')
+argument_parser.add_argument('--convert-bigger-than', metavar='SIZE', type=int, default=None, help='Size in KiB')
+argument_parser.add_argument('--jpeg-quality', type=int, default=90, metavar='QUALITY', choices=range(1, 101),
+                             help='1-100%%')
+argument_parser.add_argument('--config', metavar='PATH', default=CONFIG_PATH)
+argument_parser.add_argument('--uploader', metavar='NAME', choices=UPLOADER_NAMES,
+                             help='Available uploaders: %(choices)s', default=UPLOADER_NAMES[0])
+
+Notify.init(APPLICATION_NAME)
+success_notification = Notify.Notification.new("Screenshot successfully uploaded!\nURL copied to clipboard.")
+failure_notification = Notify.Notification.new("Screenshot upload failed!")
+loop = GObject.MainLoop()
+
+
+def screenshot_taken(path, arguments, config):
+    size = arguments.convert_bigger_than
+
+    # Convert to JPEG if file size > --convert-bigger-than
+    if size is not None and os.stat(path).st_size > size * BYTES_PER_KIB:
+        file_descriptor, temporary_path = tempfile.mkstemp('.jpg')
+        image = PIL.Image.open(path)
+        with os.fdopen(file_descriptor, 'wb') as file:
+            image.save(file, 'JPEG', optimize=True, progressive=True, quality=arguments.jpeg_quality)
+        path = temporary_path
+
+    try:
+        uploader = UPLOADERS[arguments.uploader](arguments, config)
+        url = uploader.upload(path)
+    except Exception:
+        failure_notification.show()
+        argument_parser.error(traceback.format_exc())
+
+    pyperclip.copy(url)
+    success_notification.show()
+    loop.quit()
+
+
+def screenshot_failed(arguments, config):
+    failure_notification.show()
+    loop.quit()
+
+
+def main(arguments):
+    config = configparser.ConfigParser()
+    config.read(os.path.expanduser(arguments.config))
+
+    session_bus = pydbus.SessionBus()
+    spectacle = session_bus.get(*SPECTACLE_BUS_INFO)
+    spectacle.ScreenshotTaken.connect(lambda *args: screenshot_taken(*args, arguments, config))
+    spectacle.ScreenshotFailed.connect(lambda: screenshot_failed(arguments, config))
+
+    method = getattr(spectacle, arguments.method)
+    if arguments.method in SPECTACLE_METHODS_ONE:
+        method(arguments.include_cursor)
+    elif arguments.method in SPECTACLE_METHODS_TWO:
+        method(arguments.include_window_decorations, arguments.include_cursor)
+
+    loop.run()
+
+
+if __name__ == '__main__':
+    arguments = argument_parser.parse_args(sys.argv[1:])
+    main(arguments)
