@@ -21,7 +21,7 @@ them to the AUR. I don't really want to maintain them.
 ```
 usage: sharey [-h] [--include-cursor] [--include-window-decorations]
               [--convert-bigger-than SIZE] [--jpeg-quality QUALITY]
-              [--config PATH] [--uploader NAME]
+              [--config PATH] [--uploader {imgur.com}]
               [--clipboard-backend {osx,gtk,qt,xclip,xsel,klipper,windows}]
               [{FullScreen,CurrentScreen,RectangularRegion,ActiveWindow,WindowUnderCursor}]
 
@@ -37,10 +37,8 @@ optional arguments:
   --jpeg-quality QUALITY
                         1-100%
   --config PATH
-  --uploader NAME       Available uploaders: imgur.com
+  --uploader {imgur.com}
   --clipboard-backend {osx,gtk,qt,xclip,xsel,klipper,windows}
-                        Available clipboard-backends: osx, gtk, qt, xclip,
-                        xsel, klipper, windows
 ```
 
 Currently you have to manually create a file in `~/.config/sharey.ini` with the following contents to upload screenshots

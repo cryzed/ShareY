@@ -80,13 +80,12 @@ argument_parser.add_argument('--convert-bigger-than', metavar='SIZE', type=int, 
 argument_parser.add_argument('--jpeg-quality', type=int, default=90, metavar='QUALITY', choices=range(1, 101),
                              help='1-100%%')
 argument_parser.add_argument('--config', metavar='PATH', default=CONFIG_PATH)
-argument_parser.add_argument('--uploader', metavar='NAME', choices=UPLOADER_NAMES,
-                             help='Available uploaders: %(choices)s', default=UPLOADER_NAMES[0])
+argument_parser.add_argument('--uploader', choices=UPLOADER_NAMES, default=UPLOADER_NAMES[0])
 
 # ShareY might run on Windows/OSX if there's a D-Bus implementation and any screenshot backend works, so leave them as
 # options
 argument_parser.add_argument('--clipboard-backend', choices=('osx', 'gtk', 'qt', 'xclip', 'xsel', 'klipper', 'windows'),
-                             help='Available clipboard-backends: %(choices)s', default='xsel')
+                             default='xsel')
 
 Notify.init(APPLICATION_NAME)
 success_notification = Notify.Notification.new("Screenshot successfully uploaded!\nURL copied to clipboard.")
