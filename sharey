@@ -26,9 +26,18 @@ import imgurpython
 import pydbus
 from gi.repository import GObject, Notify
 
+
+# https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+def get_xdg_config_home():
+    xdg_config_home = os.getenv('XDG_CONFIG_HOME')
+    if xdg_config_home is not None and os.path.isabs(xdg_config_home):
+        return xdg_config_home
+
+    return os.path.expanduser('~/.config')
+
+
 APPLICATION_NAME = 'ShareY'
-CONFIG_PATH = os.path.join(os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config')),
-                           APPLICATION_NAME.lower() + '.ini')
+CONFIG_PATH = os.path.join(get_xdg_config_home(), APPLICATION_NAME.lower() + '.ini')
 SPECTACLE_BUS_INFO = 'org.kde.Spectacle', '/'
 SPECTACLE_METHODS_ONE = 'FullScreen', 'CurrentScreen', 'RectangularRegion'
 SPECTACLE_METHODS_TWO = 'ActiveWindow', 'WindowUnderCursor'
