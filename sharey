@@ -27,8 +27,8 @@ import pydbus
 from gi.repository import GObject, Notify
 
 APPLICATION_NAME = 'ShareY'
-CONFIG_PATH = '~/.config/%s.ini' % APPLICATION_NAME.lower()
-
+CONFIG_PATH = os.path.join(os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config')),
+                           APPLICATION_NAME.lower() + '.ini')
 SPECTACLE_BUS_INFO = 'org.kde.Spectacle', '/'
 SPECTACLE_METHODS_ONE = 'FullScreen', 'CurrentScreen', 'RectangularRegion'
 SPECTACLE_METHODS_TWO = 'ActiveWindow', 'WindowUnderCursor'
