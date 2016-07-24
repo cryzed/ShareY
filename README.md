@@ -73,6 +73,7 @@ uploaded instead.
 * pydbus
 * Pillow
 * imgurpython
+* xsel
 * pyperclip
 
 The script is written in Python 3, Spectacle is used as the primary (and currently only) backend for taking screenshots,
