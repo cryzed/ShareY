@@ -22,6 +22,7 @@ them to the AUR. I don't really want to maintain them.
 usage: sharey [-h] [--include-cursor] [--include-window-decorations]
               [--convert-bigger-than SIZE] [--jpeg-quality QUALITY]
               [--config PATH] [--uploader NAME]
+              [--clipboard-backend {osx,gtk,qt,xclip,xsel,klipper,windows}]
               [{FullScreen,CurrentScreen,RectangularRegion,ActiveWindow,WindowUnderCursor}]
 
 positional arguments:
@@ -37,6 +38,9 @@ optional arguments:
                         1-100%
   --config PATH
   --uploader NAME       Available uploaders: imgur.com
+  --clipboard-backend {osx,gtk,qt,xclip,xsel,klipper,windows}
+                        Available clipboard-backends: osx, gtk, qt, xclip,
+                        xsel, klipper, windows
 ```
 
 Currently you have to manually create a file in `~/.config/sharey.ini` with the following contents to upload screenshots
@@ -53,6 +57,9 @@ fill in the rest of the information. This step should actually be done by the sc
 a good way to do so easily in Python without firing up a `SimpleHTTPRequestHandler` and adding much extra code
 specifically dealing with the OAuth2 mechanics (maybe someone can recommend something?).
 
+If using the clipboard-backend fails, (run `sharey` from the command-line to check) try choosing a different one with
+`--clipboard-backend`; `xclip` and `xsel` seem to be the most reliable for me.
+
 Personally I defined two custom shortcuts in KDE:
 
 * `sharey --include-cursor --convert-bigger-than 768` triggered on Alt+X
@@ -68,7 +75,6 @@ uploaded instead.
 * pydbus
 * Pillow
 * imgurpython
-* xsel
 * pyperclip
 
 The script is written in Python 3, Spectacle is used as the primary (and currently only) backend for taking screenshots,

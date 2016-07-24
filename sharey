@@ -17,14 +17,10 @@ import gi
 
 gi.require_version('Notify', '0.7')
 
-import pyperclip
-
-# xsel and xclip are the only clipboard backends that work reliably for me
-pyperclip.set_clipboard('xsel')
-
+from gi.repository import GObject, Notify
 import imgurpython
 import pydbus
-from gi.repository import GObject, Notify
+import pyperclip
 
 
 # https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
@@ -87,6 +83,11 @@ argument_parser.add_argument('--config', metavar='PATH', default=CONFIG_PATH)
 argument_parser.add_argument('--uploader', metavar='NAME', choices=UPLOADER_NAMES,
                              help='Available uploaders: %(choices)s', default=UPLOADER_NAMES[0])
 
+# ShareY might run on Windows/OSX if there's a D-Bus implementation and any screenshot backend works, so leave them as
+# options
+argument_parser.add_argument('--clipboard-backend', choices=('osx', 'gtk', 'qt', 'xclip', 'xsel', 'klipper', 'windows'),
+                             help='Available clipboard-backends: %(choices)s', default='xsel')
+
 Notify.init(APPLICATION_NAME)
 success_notification = Notify.Notification.new("Screenshot successfully uploaded!\nURL copied to clipboard.")
 failure_notification = Notify.Notification.new("Screenshot upload failed!")
@@ -111,7 +112,16 @@ def screenshot_taken(path, arguments, config):
         failure_notification.show()
         argument_parser.error(traceback.format_exc())
 
-    pyperclip.copy(url)
+    clipboard_backend = arguments.clipboard_backend
+    if clipboard_backend:
+        pyperclip.set_clipboard(clipboard_backend)
+
+    try:
+        pyperclip.copy(url)
+    except Exception:
+        failure_notification.show()
+        argument_parser.error('using clipboard-backend failed, try using a different one:\n' + traceback.format_exc())
+
     success_notification.show()
     loop.quit()
 
